@@ -1,3 +1,4 @@
+import { resolveAnnotationIndices } from "./annotations";
 import { createAdminClient } from "./supabase/admin";
 import { splitIntoParagraphs } from "./gemini";
 import type {
@@ -139,14 +140,16 @@ export async function saveAnalysisResult(
     if (error) throw error;
   }
 
-  const annotationRows = analysis.annotations.map((a) => ({
+  const resolvedIndices = resolveAnnotationIndices(content, analysis.annotations);
+
+  const annotationRows = analysis.annotations.map((a, i) => ({
     passage_id: passageId,
     target_text: a.targetText,
     meaning: a.meaning,
     part_of_speech: a.partOfSpeech ?? null,
     type: a.type,
-    start_index: a.startIndex,
-    end_index: a.endIndex,
+    start_index: resolvedIndices[i].start_index,
+    end_index: resolvedIndices[i].end_index,
     example: a.example ?? null,
   }));
 

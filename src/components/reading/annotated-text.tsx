@@ -7,11 +7,15 @@ import { AnnotationPopup } from "./annotation-popup";
 interface AnnotatedTextProps {
   text: string;
   annotations: Annotation[];
-  offset: number;
+  paragraphOffset: number;
 }
 
-export function AnnotatedText({ text, annotations, offset }: AnnotatedTextProps) {
-  const segments = buildAnnotatedSegments(text, annotations, offset);
+export function AnnotatedText({
+  text,
+  annotations,
+  paragraphOffset,
+}: AnnotatedTextProps) {
+  const segments = buildAnnotatedSegments(text, paragraphOffset, annotations);
 
   return (
     <>

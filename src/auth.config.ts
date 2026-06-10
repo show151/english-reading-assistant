@@ -1,13 +1,7 @@
 import type { NextAuthConfig } from "next-auth";
-import Google from "next-auth/providers/google";
 
 export const authConfig: NextAuthConfig = {
-  providers: [
-    Google({
-      clientId: process.env.AUTH_GOOGLE_ID,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET,
-    }),
-  ],
+  providers: [],
   pages: {
     signIn: "/login",
   },
@@ -15,7 +9,11 @@ export const authConfig: NextAuthConfig = {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
       const isLoginPage = nextUrl.pathname === "/login";
-      const isPublic = isLoginPage || nextUrl.pathname.startsWith("/api/auth");
+      const isRegisterPage = nextUrl.pathname === "/register";
+      const isPublic =
+        isLoginPage ||
+        isRegisterPage ||
+        nextUrl.pathname.startsWith("/api/auth");
 
       if (isPublic) return true;
       if (!isLoggedIn) return false;

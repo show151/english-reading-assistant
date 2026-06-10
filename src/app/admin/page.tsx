@@ -40,11 +40,11 @@ export default async function AdminPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">教材管理</h1>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-xl font-bold sm:text-2xl">教材管理</h1>
         <Link
           href="/admin/passages/new"
-          className={cn(buttonVariants(), "inline-flex")}
+          className={cn(buttonVariants(), "inline-flex w-full justify-center sm:w-auto")}
         >
           <Plus className="mr-2 h-4 w-4" />
           新規登録

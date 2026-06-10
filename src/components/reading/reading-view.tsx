@@ -4,24 +4,34 @@ import { useEffect, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { AnnotatedText } from "./annotated-text";
 import { TranslationPanel } from "./translation-panel";
 import { AnnotationsList } from "./annotations-list";
-import { getParagraphOffset } from "@/lib/annotations";
+import { MobileReadingPanel } from "./mobile-reading-panel";
+import { computeParagraphOffsets } from "@/lib/annotations";
 import type { PassageWithDetails } from "@/lib/types";
 
 interface ReadingViewProps {
   passage: PassageWithDetails;
 }
 
+type MobilePanel = "closed" | "translation" | "annotations";
+
 export function ReadingView({ passage }: ReadingViewProps) {
   const [showTranslation, setShowTranslation] = useState(false);
+  const [mobilePanel, setMobilePanel] = useState<MobilePanel>("closed");
 
   const paragraphTexts =
     passage.paragraphs.length > 0
       ? passage.paragraphs.map((p) => p.content)
-      : passage.content.split(/\n\s*\n/).filter(Boolean);
+      : passage.content.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
+
+  const paragraphOffsets = computeParagraphOffsets(
+    passage.content,
+    paragraphTexts
+  );
+
+  const mobilePanelOpen = mobilePanel !== "closed";
 
   useEffect(() => {
     fetch("/api/study-history", {
@@ -31,88 +41,91 @@ export function ReadingView({ passage }: ReadingViewProps) {
     }).catch(console.error);
   }, [passage.id]);
 
-  const mainContent = (
-    <article className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-bold">{passage.title}</h1>
-        <div className="mt-1 flex gap-2 text-sm text-muted-foreground">
-          {passage.level && <span>レベル: {passage.level}</span>}
-          {passage.genre && <span>ジャンル: {passage.genre}</span>}
-        </div>
-      </header>
-
-      <div className="flex items-center gap-2 lg:hidden">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setShowTranslation(!showTranslation)}
-        >
-          {showTranslation ? <EyeOff className="mr-1 h-4 w-4" /> : <Eye className="mr-1 h-4 w-4" />}
-          {showTranslation ? "和訳を隠す" : "和訳を表示"}
-        </Button>
-        <Sheet>
-          <SheetTrigger
-            className="inline-flex h-7 items-center justify-center rounded-[min(var(--radius-md),12px)] border border-border bg-background px-2.5 text-[0.8rem] font-medium hover:bg-muted"
-          >
-            注釈一覧
-          </SheetTrigger>
-          <SheetContent side="bottom" className="h-[60vh]">
-            <SheetHeader>
-              <SheetTitle>注釈一覧</SheetTitle>
-            </SheetHeader>
-            <AnnotationsList annotations={passage.annotations} />
-          </SheetContent>
-        </Sheet>
-      </div>
-
-      {paragraphTexts.map((text, index) => (
-        <p key={index} className="text-lg leading-relaxed">
-          <AnnotatedText
-            text={text}
-            annotations={passage.annotations}
-            offset={getParagraphOffset(paragraphTexts, index)}
-          />
-        </p>
-      ))}
-
-      {showTranslation && (
-        <div className="rounded-lg border bg-muted/30 p-4 lg:hidden">
-          <TranslationPanel passage={passage} showFullTranslation />
-        </div>
-      )}
-    </article>
-  );
-
-  const sidebar = (
-    <aside className="hidden h-[calc(100vh-3.5rem)] border-l lg:block">
-      <Tabs defaultValue="translation" className="flex h-full flex-col">
-        <TabsList className="mx-4 mt-4 grid w-auto grid-cols-2">
-          <TabsTrigger value="translation">和訳・要約</TabsTrigger>
-          <TabsTrigger value="annotations">注釈一覧</TabsTrigger>
-        </TabsList>
-        <TabsContent value="translation" className="flex-1 overflow-hidden">
-          <div className="px-4 pb-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowTranslation(!showTranslation)}
-            >
-              {showTranslation ? "全文和訳を隠す" : "全文和訳を表示"}
-            </Button>
-          </div>
-          <TranslationPanel passage={passage} showFullTranslation={showTranslation} />
-        </TabsContent>
-        <TabsContent value="annotations" className="flex-1 overflow-hidden">
-          <AnnotationsList annotations={passage.annotations} />
-        </TabsContent>
-      </Tabs>
-    </aside>
-  );
-
   return (
-    <div className="grid lg:grid-cols-[1fr_320px]">
-      <div className="p-6">{mainContent}</div>
-      {sidebar}
+    <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_minmax(280px,320px)]">
+      {/* 中央: 英文本文 */}
+      <article
+        className={`space-y-5 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 ${
+          mobilePanelOpen ? "pb-52" : "pb-24"
+        } xl:pb-6`}
+      >
+        <header>
+          <h1 className="text-xl font-bold leading-snug sm:text-2xl">
+            {passage.title}
+          </h1>
+          <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground sm:text-sm">
+            {passage.level && (
+              <span className="rounded-md bg-muted px-2 py-0.5">{passage.level}</span>
+            )}
+            {passage.genre && (
+              <span className="rounded-md bg-muted px-2 py-0.5">{passage.genre}</span>
+            )}
+          </div>
+        </header>
+
+        <div className="rounded-lg border border-dashed border-muted-foreground/30 bg-muted/20 px-3 py-2 text-xs text-muted-foreground xl:hidden">
+          下線の単語・フレーズをタップすると意味が表示されます
+        </div>
+
+        {paragraphTexts.map((text, index) => (
+          <p
+            key={index}
+            className="text-base leading-[1.85] sm:text-lg sm:leading-relaxed"
+          >
+            <AnnotatedText
+              text={text}
+              annotations={passage.annotations}
+              paragraphOffset={paragraphOffsets[index] ?? 0}
+            />
+          </p>
+        ))}
+      </article>
+
+      {/* PC: 右サイドバー（和訳・注釈） */}
+      <aside className="hidden border-l bg-muted/10 xl:block">
+        <div className="sticky top-0 flex h-[calc(100dvh-3.5rem)] flex-col">
+          <Tabs defaultValue="translation" className="flex h-full flex-col">
+            <TabsList className="mx-4 mt-4 grid w-auto shrink-0 grid-cols-2">
+              <TabsTrigger value="translation">和訳・要約</TabsTrigger>
+              <TabsTrigger value="annotations">
+                注釈 ({passage.annotations.length})
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="translation" className="min-h-0 flex-1 overflow-hidden">
+              <div className="px-4 pb-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowTranslation(!showTranslation)}
+                >
+                  {showTranslation ? (
+                    <EyeOff className="mr-1 h-4 w-4" />
+                  ) : (
+                    <Eye className="mr-1 h-4 w-4" />
+                  )}
+                  {showTranslation ? "全文和訳を隠す" : "全文和訳を表示"}
+                </Button>
+              </div>
+              <TranslationPanel
+                passage={passage}
+                showFullTranslation={showTranslation}
+              />
+            </TabsContent>
+            <TabsContent value="annotations" className="min-h-0 flex-1 overflow-hidden">
+              <AnnotationsList annotations={passage.annotations} />
+            </TabsContent>
+          </Tabs>
+        </div>
+      </aside>
+
+      {/* スマホ: 下部パネル */}
+      <MobileReadingPanel
+        passage={passage}
+        panel={mobilePanel}
+        showFullTranslation={showTranslation}
+        onPanelChange={setMobilePanel}
+        onToggleFullTranslation={() => setShowTranslation(!showTranslation)}
+      />
     </div>
   );
 }

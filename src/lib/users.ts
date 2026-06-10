@@ -1,5 +1,8 @@
+import bcrypt from "bcryptjs";
 import { createAdminClient } from "./supabase/admin";
 import type { User, UserRole } from "./types";
+
+const SALT_ROUNDS = 12;
 
 function getAdminEmails(): string[] {
   return (process.env.ADMIN_EMAILS ?? "")
@@ -13,50 +16,67 @@ export function resolveRole(email: string): UserRole {
   return admins.includes(email.toLowerCase()) ? "admin" : "learner";
 }
 
-export async function upsertUser(input: {
-  email: string;
-  name?: string | null;
-}): Promise<User> {
+export async function getUserByEmail(email: string): Promise<User | null> {
   const supabase = createAdminClient();
-  const role = resolveRole(input.email);
+  const { data } = await supabase
+    .from("users")
+    .select("*")
+    .eq("email", email.toLowerCase())
+    .maybeSingle();
+  return data;
+}
+
+export async function verifyUser(
+  email: string,
+  password: string
+): Promise<User | null> {
+  const supabase = createAdminClient();
+  const { data: user } = await supabase
+    .from("users")
+    .select("*")
+    .eq("email", email.toLowerCase())
+    .maybeSingle();
+
+  if (!user?.password_hash) return null;
+
+  const valid = await bcrypt.compare(password, user.password_hash);
+  if (!valid) return null;
+
+  return user;
+}
+
+export async function registerUser(input: {
+  email: string;
+  password: string;
+  name?: string;
+}): Promise<User> {
+  const email = input.email.toLowerCase().trim();
+  const supabase = createAdminClient();
 
   const { data: existing } = await supabase
     .from("users")
-    .select("*")
-    .eq("email", input.email)
+    .select("id")
+    .eq("email", email)
     .maybeSingle();
 
   if (existing) {
-    const { data, error } = await supabase
-      .from("users")
-      .update({ name: input.name ?? existing.name })
-      .eq("id", existing.id)
-      .select()
-      .single();
-    if (error) throw error;
-    return data;
+    throw new Error("このメールアドレスは既に登録されています。");
   }
+
+  const password_hash = await bcrypt.hash(input.password, SALT_ROUNDS);
+  const role = resolveRole(email);
 
   const { data, error } = await supabase
     .from("users")
     .insert({
-      email: input.email,
-      name: input.name ?? null,
+      email,
+      name: input.name?.trim() || null,
+      password_hash,
       role,
     })
     .select()
     .single();
 
   if (error) throw error;
-  return data;
-}
-
-export async function getUserByEmail(email: string): Promise<User | null> {
-  const supabase = createAdminClient();
-  const { data } = await supabase
-    .from("users")
-    .select("*")
-    .eq("email", email)
-    .maybeSingle();
   return data;
 }

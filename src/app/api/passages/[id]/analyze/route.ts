@@ -25,7 +25,12 @@ export async function POST(_request: Request, context: RouteContext) {
     return NextResponse.json(result);
   } catch (error) {
     console.error(error);
-    const message = error instanceof Error ? error.message : "Analysis failed";
-    return NextResponse.json({ error: message }, { status: 500 });
+    const message = error instanceof Error ? error.message : "AI解析に失敗しました。";
+    const isTemporary =
+      /混雑|上限|try again|503|429|UNAVAILABLE/i.test(message);
+    return NextResponse.json(
+      { error: message },
+      { status: isTemporary ? 503 : 500 }
+    );
   }
 }

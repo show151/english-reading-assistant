@@ -16,7 +16,7 @@ export default async function PassagesPage() {
 
   if (error) {
     return (
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <Card>
           <CardHeader>
             <CardTitle>セットアップが必要です</CardTitle>
@@ -31,24 +31,26 @@ export default async function PassagesPage() {
   }
 
   return (
-    <div className="p-6">
-      <h1 className="mb-6 text-2xl font-bold">教材一覧</h1>
+    <div className="p-4 sm:p-6">
+      <h1 className="mb-4 text-xl font-bold sm:mb-6 sm:text-2xl">教材一覧</h1>
       {passages.length === 0 ? (
         <p className="text-muted-foreground">公開中の教材はありません。</p>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-1">
           {passages.map((p) => (
             <Link key={p.id} href={`/passages/${p.id}`}>
-              <Card className="h-full transition-shadow hover:shadow-md">
-                <CardHeader>
-                  <CardTitle className="text-lg">{p.title}</CardTitle>
-                  <CardDescription className="flex gap-2">
+              <Card className="h-full transition-shadow hover:shadow-md active:scale-[0.99]">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base leading-snug sm:text-lg">
+                    {p.title}
+                  </CardTitle>
+                  <CardDescription className="flex flex-wrap gap-1.5 pt-1">
                     {p.level && <Badge variant="outline">{p.level}</Badge>}
                     {p.genre && <Badge variant="secondary">{p.genre}</Badge>}
                   </CardDescription>
                 </CardHeader>
                 {p.summary && (
-                  <CardContent>
+                  <CardContent className="pt-0">
                     <p className="line-clamp-2 text-sm text-muted-foreground">
                       {p.summary}
                     </p>

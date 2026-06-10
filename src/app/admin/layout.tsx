@@ -5,7 +5,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <AuthSessionProvider>
       <AppHeader />
-      <main className="mx-auto max-w-5xl p-6">{children}</main>
+      <main className="mx-auto w-full max-w-5xl p-4 sm:p-6">{children}</main>
     </AuthSessionProvider>
   );
 }

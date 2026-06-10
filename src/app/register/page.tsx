@@ -1,9 +1,9 @@
 import { BookOpen } from "lucide-react";
-import { LoginForm } from "@/components/auth/login-form";
+import { RegisterForm } from "@/components/auth/register-form";
 import { AuthSessionProvider } from "@/components/providers/session-provider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-export default function LoginPage() {
+export default function RegisterPage() {
   return (
     <AuthSessionProvider>
       <div className="flex min-h-screen items-center justify-center bg-muted/30 p-4">
@@ -12,13 +12,13 @@ export default function LoginPage() {
             <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground">
               <BookOpen className="h-6 w-6" />
             </div>
-            <CardTitle className="text-2xl">English Reading Assistant</CardTitle>
+            <CardTitle className="text-2xl">新規登録</CardTitle>
             <CardDescription>
-              メールアドレスとパスワードでログイン
+              アカウントを作成して学習を始めましょう
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <LoginForm />
+            <RegisterForm />
           </CardContent>
         </Card>
       </div>

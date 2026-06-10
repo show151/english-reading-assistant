@@ -42,12 +42,11 @@ export function PassageEditor({ initialPassage }: PassageEditorProps) {
       const res = await fetch(`/api/passages/${passage.id}/analyze`, {
         method: "POST",
       });
+      const data = await res.json();
       if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error ?? "Analysis failed");
+        throw new Error(data.error ?? "AI解析に失敗しました。");
       }
-      const updated = await res.json();
-      setPassage(updated);
+      setPassage(data);
     } catch (error) {
       console.error(error);
       alert(error instanceof Error ? error.message : "AI解析に失敗しました。");
@@ -114,13 +113,18 @@ export function PassageEditor({ initialPassage }: PassageEditorProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold">{passage.title}</h1>
-          <Badge className="mt-1">{STATUS_LABELS[passage.status]}</Badge>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-xl font-bold leading-snug sm:text-2xl">{passage.title}</h1>
+          <Badge className="mt-2">{STATUS_LABELS[passage.status]}</Badge>
         </div>
-        <div className="flex gap-2">
-          <Button onClick={handleAnalyze} disabled={analyzing} variant="secondary">
+        <div className="flex shrink-0 gap-2">
+          <Button
+            onClick={handleAnalyze}
+            disabled={analyzing}
+            variant="secondary"
+            className="flex-1 sm:flex-none"
+          >
             {analyzing ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
@@ -128,7 +132,7 @@ export function PassageEditor({ initialPassage }: PassageEditorProps) {
             )}
             解析開始
           </Button>
-          <Button onClick={handleSave} disabled={saving}>
+          <Button onClick={handleSave} disabled={saving} className="flex-1 sm:flex-none">
             {saving ? "保存中..." : "保存"}
           </Button>
         </div>

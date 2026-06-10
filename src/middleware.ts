@@ -5,7 +5,10 @@ export default auth((req) => {
   const { pathname } = req.nextUrl;
 
   if (pathname.startsWith("/api/auth")) return;
-  if (pathname === "/login") {
+
+  const isPublic = pathname === "/login" || pathname === "/register";
+
+  if (isPublic) {
     if (isLoggedIn) {
       return Response.redirect(new URL("/passages", req.nextUrl));
     }
