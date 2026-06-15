@@ -106,6 +106,16 @@ export async function updatePassage(
   return data;
 }
 
+export async function deletePassage(id: string): Promise<void> {
+  const supabase = createAdminClient();
+  const { error } = await supabase
+    .from("passages")
+    .delete()
+    .eq("id", id);
+
+  if (error) throw error;
+}
+
 export async function saveAnalysisResult(
   passageId: string,
   content: string,
