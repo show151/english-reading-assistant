@@ -10,7 +10,7 @@ Requirements:
 3. "paragraphs": array matching each paragraph (split by blank lines), each with:
    - "translation": Japanese translation of that paragraph
    - "summary": paragraph summary in Japanese (within 100 characters)
-4. "annotations": extract important items for learners:
+4. "annotations": extract AT LEAST 10 to 15 important items (or as many as possible) covering the ENTIRE passage for learners. Be exhaustive and thorough:
    - difficult words (type: "word")
    - idioms/phrases (type: "phrase")
    - grammar points (type: "grammar")

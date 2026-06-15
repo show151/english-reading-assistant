@@ -28,13 +28,13 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { title, content, level, genre } = body;
+    const { title, content, status } = body;
 
     if (!title || !content) {
       return NextResponse.json({ error: "Title and content are required" }, { status: 400 });
     }
 
-    const passage = await createPassage({ title, content, level, genre });
+    const passage = await createPassage({ title, content, status });
     return NextResponse.json(passage, { status: 201 });
   } catch (error) {
     console.error(error);

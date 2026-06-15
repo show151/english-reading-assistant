@@ -67,8 +67,6 @@ export function PassageEditor({ initialPassage }: PassageEditorProps) {
             translation: passage.translation,
             summary: passage.summary,
             status: passage.status,
-            level: passage.level,
-            genre: passage.genre,
           },
           paragraphs: passage.paragraphs.map((p) => ({
             id: p.id,
@@ -150,7 +148,7 @@ export function PassageEditor({ initialPassage }: PassageEditorProps) {
               onChange={(e) => setPassage({ ...passage, title: e.target.value })}
             />
           </div>
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-1">
             <div className="space-y-2">
               <Label>公開設定</Label>
               <Select
@@ -168,20 +166,6 @@ export function PassageEditor({ initialPassage }: PassageEditorProps) {
                   <SelectItem value="archived">非公開</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>レベル</Label>
-              <Input
-                value={passage.level ?? ""}
-                onChange={(e) => setPassage({ ...passage, level: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>ジャンル</Label>
-              <Input
-                value={passage.genre ?? ""}
-                onChange={(e) => setPassage({ ...passage, genre: e.target.value })}
-              />
             </div>
           </div>
         </CardContent>
