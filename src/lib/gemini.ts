@@ -1,42 +1,107 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { AiAnalysisResult } from "./types";
 
-const ANALYSIS_PROMPT = `You are an English teaching assistant for Japanese learners.
+const ANALYSIS_PROMPT = `You are an English teaching assistant for Japanese learners who are not confident in English.
+
 Analyze the following English passage and return ONLY valid JSON (no markdown, no code fences).
 
 Requirements:
-1. "translation": natural Japanese translation of the entire passage
-2. "summary": passage summary in Japanese (within 200 characters)
-3. "paragraphs": array matching each paragraph (split by blank lines), each with:
-   - "translation": Japanese translation of that paragraph
-   - "summary": paragraph summary in Japanese (within 100 characters)
-4. "annotations": extract important items for learners:
+
+1. "translation"
+   - Translate the entire passage into natural and easy-to-understand Japanese.
+   - Prioritize comprehension over literal translation.
+   - Use simple Japanese that a Japanese high school student can understand.
+
+2. "summary"
+   - Summarize the entire passage in Japanese.
+   - Maximum 200 characters.
+   - Use simple vocabulary.
+
+3. "paragraphs"
+   - Array matching each paragraph (split by blank lines).
+   - For each paragraph:
+     - "translation": easy-to-understand Japanese translation.
+     - "summary": Japanese summary within 100 characters.
+
+4. "annotations"
+   Extract important items that help learners understand the passage.
+
+   Include:
    - difficult words (type: "word")
-   - idioms/phrases (type: "phrase")
+   - useful phrases and idioms (type: "phrase")
    - grammar points (type: "grammar")
    - sentence structures (type: "structure")
+
+   Focus on:
+   - vocabulary that may be difficult for Japanese learners
+   - phrasal verbs
+   - idioms
+   - relative clauses
+   - passive voice
+   - infinitives
+   - gerunds
+   - participles
+   - comparison expressions
+   - conditional sentences
+   - complex sentence structures
+
    For each annotation:
    - "targetText": exact text from the passage
-   - "meaning": Japanese meaning/explanation
+   - "meaning": simple Japanese explanation
    - "partOfSpeech": English part of speech (for words) or grammar label
    - "type": "word" | "phrase" | "grammar" | "structure"
    - "startIndex": character start index in the FULL passage (0-based)
    - "endIndex": character end index in the FULL passage (exclusive)
-   - "example": optional example sentence in English
+   - "example": simple English example sentence (optional)
+
+5. "readingGuide"
+   Add a learner-friendly explanation section:
+   - "mainIdea": one-sentence explanation of what the passage is about
+   - "importantPoints": array of up to 5 key points in Japanese
+   - "difficultSentenceExplanation": array explaining difficult sentences in simple Japanese
+
+Rules:
+- Return ONLY valid JSON.
+- Escape all quotes properly.
+- Preserve paragraph order.
+- Do not omit any paragraph.
+- Do not invent information not present in the passage.
+- All startIndex/endIndex values must refer to positions in the FULL original passage.
+- Explanations should be written for learners who often struggle with English grammar and vocabulary.
+- Use clear and simple Japanese.
 
 Return JSON in this exact shape:
+
 {
   "translation": "...",
   "summary": "...",
-  "paragraphs": [{ "translation": "...", "summary": "..." }],
-  "annotations": [{
-    "targetText": "...",
-    "meaning": "...",
-    "partOfSpeech": "...",
-    "type": "word",
-    "startIndex": 0,
-    "endIndex": 5
-  }]
+  "paragraphs": [
+    {
+      "translation": "...",
+      "summary": "..."
+    }
+  ],
+  "annotations": [
+    {
+      "targetText": "...",
+      "meaning": "...",
+      "partOfSpeech": "...",
+      "type": "word",
+      "startIndex": 0,
+      "endIndex": 5,
+      "example": "..."
+    }
+  ],
+  "readingGuide": {
+    "mainIdea": "...",
+    "importantPoints": ["..."],
+    "difficultSentenceExplanation": [
+      {
+        "sentence": "...",
+        "explanation": "..."
+      }
+    ]
+  }
 }
 
 PASSAGE:
