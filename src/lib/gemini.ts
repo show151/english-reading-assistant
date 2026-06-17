@@ -24,35 +24,53 @@ Requirements:
      - "summary": Japanese summary within 100 characters.
 
 4. "annotations"
-   Extract important items that help learners understand the passage.
 
-   Include:
-   - difficult words (type: "word")
-   - useful phrases and idioms (type: "phrase")
-   - grammar points (type: "grammar")
-   - sentence structures (type: "structure")
+Extract important items that help learners understand the passage.
 
-   Focus on:
-   - vocabulary that may be difficult for Japanese learners
-   - phrasal verbs
-   - idioms
-   - relative clauses
-   - passive voice
-   - infinitives
-   - gerunds
-   - participles
-   - comparison expressions
-   - conditional sentences
-   - complex sentence structures
+Include:
+- difficult words (type: "word")
+- useful phrases and idioms (type: "phrase")
+- grammar points (type: "grammar")
+- sentence structures (type: "structure")
 
-   For each annotation:
-   - "targetText": exact text from the passage
-   - "meaning": simple Japanese explanation
-   - "partOfSpeech": English part of speech (for words) or grammar label
-   - "type": "word" | "phrase" | "grammar" | "structure"
-   - "startIndex": character start index in the FULL passage (0-based)
-   - "endIndex": character end index in the FULL passage (exclusive)
-   - "example": simple English example sentence (optional)
+IMPORTANT:
+- Extract AT LEAST 40 annotations whenever the passage length permits.
+- If the passage is long, extract 40–80 annotations.
+- Do NOT stop after finding only a few items.
+- Cover the entire passage from beginning to end.
+- Include annotations from all paragraphs.
+- Prioritize educational value for Japanese learners.
+
+Selection priority:
+1. Difficult vocabulary
+2. Phrasal verbs
+3. Idioms and fixed expressions
+4. Grammar patterns
+5. Relative clauses
+6. Passive voice
+7. Infinitives and gerunds
+8. Participial constructions
+9. Comparison expressions
+10. Conditional sentences
+11. Complex sentence structures
+12. Academic or formal expressions
+
+For each annotation:
+- "targetText": exact text from the passage
+- "meaning": simple Japanese explanation suitable for English beginners
+- "partOfSpeech": English part of speech (for words) or grammar label
+- "type": "word" | "phrase" | "grammar" | "structure"
+- "startIndex": character start index in the FULL passage (0-based)
+- "endIndex": character end index in the FULL passage (exclusive)
+- "example": simple English example sentence (optional)
+
+Quality requirements:
+- Avoid duplicate annotations.
+- Prefer shorter meaningful spans over entire sentences.
+- Include both vocabulary and grammar.
+- Do not annotate only difficult words; maintain a balance between words, phrases, grammar, and structures.
+- For passages longer than 500 words, aim for 50+ annotations.
+- For passages longer than 1000 words, aim for 70+ annotations.
 
 5. "readingGuide"
    Add a learner-friendly explanation section:
