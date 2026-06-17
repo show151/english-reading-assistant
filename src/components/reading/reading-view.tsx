@@ -53,14 +53,6 @@ export function ReadingView({ passage }: ReadingViewProps) {
           <h1 className="text-xl font-bold leading-snug sm:text-2xl">
             {passage.title}
           </h1>
-          <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground sm:text-sm">
-            {passage.level && (
-              <span className="rounded-md bg-muted px-2 py-0.5">{passage.level}</span>
-            )}
-            {passage.genre && (
-              <span className="rounded-md bg-muted px-2 py-0.5">{passage.genre}</span>
-            )}
-          </div>
         </header>
 
         <div className="rounded-lg border border-dashed border-muted-foreground/30 bg-muted/20 px-3 py-2 text-xs text-muted-foreground xl:hidden">

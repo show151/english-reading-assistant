@@ -67,8 +67,7 @@ export async function getPassageById(id: string): Promise<PassageWithDetails | n
 export async function createPassage(input: {
   title: string;
   content: string;
-  level?: string;
-  genre?: string;
+  status?: string;
 }): Promise<Passage> {
   const supabase = createAdminClient();
   const { data, error } = await supabase
@@ -76,9 +75,7 @@ export async function createPassage(input: {
     .insert({
       title: input.title,
       content: input.content,
-      level: input.level ?? null,
-      genre: input.genre ?? null,
-      status: "draft",
+      status: input.status ?? "draft",
     })
     .select()
     .single();
@@ -94,8 +91,6 @@ export async function updatePassage(
     content: string;
     translation: string;
     summary: string;
-    level: string;
-    genre: string;
     status: PassageStatus;
   }>
 ): Promise<Passage> {
@@ -111,6 +106,16 @@ export async function updatePassage(
   return data;
 }
 
+export async function deletePassage(id: string): Promise<void> {
+  const supabase = createAdminClient();
+  const { error } = await supabase
+    .from("passages")
+    .delete()
+    .eq("id", id);
+
+  if (error) throw error;
+}
+
 export async function saveAnalysisResult(
   passageId: string,
   content: string,
@@ -119,13 +124,17 @@ export async function saveAnalysisResult(
   const supabase = createAdminClient();
   const paragraphTexts = splitIntoParagraphs(content);
 
-  await supabase.from("passages").update({
+  const { error: updateError } = await supabase.from("passages").update({
     translation: analysis.translation,
     summary: analysis.summary,
   }).eq("id", passageId);
+  if (updateError) throw updateError;
 
-  await supabase.from("paragraphs").delete().eq("passage_id", passageId);
-  await supabase.from("annotations").delete().eq("passage_id", passageId);
+  const { error: delPErr } = await supabase.from("paragraphs").delete().eq("passage_id", passageId);
+  if (delPErr) throw delPErr;
+  
+  const { error: delAErr } = await supabase.from("annotations").delete().eq("passage_id", passageId);
+  if (delAErr) throw delAErr;
 
   const paragraphRows = paragraphTexts.map((text, index) => ({
     passage_id: passageId,
@@ -142,16 +151,23 @@ export async function saveAnalysisResult(
 
   const resolvedIndices = resolveAnnotationIndices(content, analysis.annotations);
 
-  const annotationRows = analysis.annotations.map((a, i) => ({
-    passage_id: passageId,
-    target_text: a.targetText,
-    meaning: a.meaning,
-    part_of_speech: a.partOfSpeech ?? null,
-    type: a.type,
-    start_index: resolvedIndices[i].start_index,
-    end_index: resolvedIndices[i].end_index,
-    example: a.example ?? null,
-  }));
+  const annotationRows = analysis.annotations.map((a, i) => {
+    let safeType = (a.type || "").toLowerCase();
+    if (!["word", "phrase", "grammar", "structure"].includes(safeType)) {
+      safeType = "word";
+    }
+
+    return {
+      passage_id: passageId,
+      target_text: a.targetText,
+      meaning: a.meaning,
+      part_of_speech: a.partOfSpeech ?? null,
+      type: safeType as any,
+      start_index: resolvedIndices[i].start_index,
+      end_index: resolvedIndices[i].end_index,
+      example: a.example ?? null,
+    };
+  });
 
   if (annotationRows.length > 0) {
     const { error } = await supabase.from("annotations").insert(annotationRows);
@@ -168,7 +184,8 @@ export async function updateAnnotations(
   annotations: Omit<Annotation, "created_at" | "passage_id">[]
 ): Promise<void> {
   const supabase = createAdminClient();
-  await supabase.from("annotations").delete().eq("passage_id", passageId);
+  const { error: delErr } = await supabase.from("annotations").delete().eq("passage_id", passageId);
+  if (delErr) throw delErr;
 
   if (annotations.length === 0) return;
 

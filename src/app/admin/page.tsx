@@ -61,9 +61,6 @@ export default async function AdminPage() {
                 <CardContent className="flex items-center justify-between py-4">
                   <div>
                     <p className="font-medium">{p.title}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {p.level} · {p.genre}
-                    </p>
                   </div>
                   <Badge variant={STATUS_VARIANT[p.status]}>
                     {STATUS_LABELS[p.status]}

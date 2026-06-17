@@ -8,8 +8,6 @@ export interface Passage {
   content: string;
   translation: string | null;
   summary: string | null;
-  level: string | null;
-  genre: string | null;
   status: PassageStatus;
   created_at: string;
   updated_at: string;

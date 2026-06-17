@@ -5,6 +5,7 @@ import {
   updateAnnotations,
   updateParagraphs,
   updatePassage,
+  deletePassage,
 } from "@/lib/passages";
 
 type RouteContext = { params: Promise<{ id: string }> };
@@ -66,3 +67,21 @@ export async function PATCH(request: Request, context: RouteContext) {
     return NextResponse.json({ error: "Failed to update passage" }, { status: 500 });
   }
 }
+
+export async function DELETE(_request: Request, context: RouteContext) {
+  const session = await auth();
+  if (!session?.user || session.user.role !== "admin") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const { id } = await context.params;
+
+  try {
+    await deletePassage(id);
+    return new NextResponse(null, { status: 204 });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ error: "Failed to delete passage" }, { status: 500 });
+  }
+}
+

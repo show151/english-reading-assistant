@@ -41,11 +41,6 @@ export function PassageSidebarContent({
                   )}
                 >
                   <span className="line-clamp-2">{p.title}</span>
-                  {p.level && (
-                    <Badge variant="outline" className="mt-1 text-xs">
-                      {p.level}
-                    </Badge>
-                  )}
                 </Link>
               </li>
             ))

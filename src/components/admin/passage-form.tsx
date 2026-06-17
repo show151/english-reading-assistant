@@ -6,27 +6,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const LEVELS = ["初級", "中級", "上級", "大学受験", "TOEIC"];
-const GENRES = ["ニュース", "小説", "エッセイ", "科学", "ビジネス", "その他"];
 
 export function PassageForm() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [level, setLevel] = useState("");
-  const [genre, setGenre] = useState("");
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.MouseEvent<HTMLButtonElement>, targetStatus: "draft" | "published") {
     e.preventDefault();
     setLoading(true);
 
@@ -34,7 +23,7 @@ export function PassageForm() {
       const res = await fetch("/api/passages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, content, level, genre }),
+        body: JSON.stringify({ title, content, status: targetStatus }),
       });
 
       if (!res.ok) throw new Error("Failed to create");
@@ -54,7 +43,7 @@ export function PassageForm() {
         <CardTitle>新規教材登録</CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="title">タイトル</Label>
             <Input
@@ -64,34 +53,7 @@ export function PassageForm() {
               required
             />
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label>レベル</Label>
-              <Select value={level} onValueChange={(v) => setLevel(v ?? "")}>
-                <SelectTrigger>
-                  <SelectValue placeholder="選択" />
-                </SelectTrigger>
-                <SelectContent>
-                  {LEVELS.map((l) => (
-                    <SelectItem key={l} value={l}>{l}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>ジャンル</Label>
-              <Select value={genre} onValueChange={(v) => setGenre(v ?? "")}>
-                <SelectTrigger>
-                  <SelectValue placeholder="選択" />
-                </SelectTrigger>
-                <SelectContent>
-                  {GENRES.map((g) => (
-                    <SelectItem key={g} value={g}>{g}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+
           <div className="space-y-2">
             <Label htmlFor="content">本文（段落は空行で区切る）</Label>
             <Textarea
@@ -103,9 +65,23 @@ export function PassageForm() {
               className="font-mono text-sm"
             />
           </div>
-          <Button type="submit" disabled={loading}>
-            {loading ? "作成中..." : "教材を作成"}
-          </Button>
+          <div className="flex gap-4">
+            <Button 
+              type="button" 
+              onClick={(e) => handleSubmit(e, "draft")} 
+              disabled={loading || !title || !content} 
+              variant="secondary"
+            >
+              {loading ? "保存中..." : "下書きとして保存"}
+            </Button>
+            <Button 
+              type="button" 
+              onClick={(e) => handleSubmit(e, "published")} 
+              disabled={loading || !title || !content}
+            >
+              {loading ? "保存中..." : "公開して保存"}
+            </Button>
+          </div>
         </form>
       </CardContent>
     </Card>

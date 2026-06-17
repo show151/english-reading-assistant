@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Sparkles } from "lucide-react";
+import { Loader2, Sparkles, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -67,8 +67,6 @@ export function PassageEditor({ initialPassage }: PassageEditorProps) {
             translation: passage.translation,
             summary: passage.summary,
             status: passage.status,
-            level: passage.level,
-            genre: passage.genre,
           },
           paragraphs: passage.paragraphs.map((p) => ({
             id: p.id,
@@ -96,6 +94,24 @@ export function PassageEditor({ initialPassage }: PassageEditorProps) {
       alert("保存に失敗しました。");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!window.confirm("この教材を削除してもよろしいですか？\n※関連する解析結果や履歴もすべて削除されます。")) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/passages/${passage.id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Delete failed");
+      router.push("/admin/passages");
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+      alert("削除に失敗しました。");
     }
   }
 
@@ -132,6 +148,14 @@ export function PassageEditor({ initialPassage }: PassageEditorProps) {
             )}
             解析開始
           </Button>
+          <Button
+            onClick={handleDelete}
+            variant="destructive"
+            className="flex-1 sm:flex-none"
+          >
+            <Trash2 className="mr-2 h-4 w-4" />
+            削除
+          </Button>
           <Button onClick={handleSave} disabled={saving} className="flex-1 sm:flex-none">
             {saving ? "保存中..." : "保存"}
           </Button>
@@ -150,7 +174,7 @@ export function PassageEditor({ initialPassage }: PassageEditorProps) {
               onChange={(e) => setPassage({ ...passage, title: e.target.value })}
             />
           </div>
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-1">
             <div className="space-y-2">
               <Label>公開設定</Label>
               <Select
@@ -168,20 +192,6 @@ export function PassageEditor({ initialPassage }: PassageEditorProps) {
                   <SelectItem value="archived">非公開</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>レベル</Label>
-              <Input
-                value={passage.level ?? ""}
-                onChange={(e) => setPassage({ ...passage, level: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>ジャンル</Label>
-              <Input
-                value={passage.genre ?? ""}
-                onChange={(e) => setPassage({ ...passage, genre: e.target.value })}
-              />
             </div>
           </div>
         </CardContent>

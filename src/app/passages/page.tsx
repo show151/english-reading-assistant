@@ -44,10 +44,6 @@ export default async function PassagesPage() {
                   <CardTitle className="text-base leading-snug sm:text-lg">
                     {p.title}
                   </CardTitle>
-                  <CardDescription className="flex flex-wrap gap-1.5 pt-1">
-                    {p.level && <Badge variant="outline">{p.level}</Badge>}
-                    {p.genre && <Badge variant="secondary">{p.genre}</Badge>}
-                  </CardDescription>
                 </CardHeader>
                 {p.summary && (
                   <CardContent className="pt-0">
